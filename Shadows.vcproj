@@ -194,6 +194,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\plane.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Shader.cpp"
 				>
 			</File>
@@ -244,6 +248,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\plane.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Resource.h"
 				>
 			</File>
@@ -275,6 +283,10 @@
 			</File>
 			<File
 				RelativePath=".\morphing.vsh"
+				>
+			</File>
+			<File
+				RelativePath=".\plane.vsh"
 				>
 			</File>
 			<File

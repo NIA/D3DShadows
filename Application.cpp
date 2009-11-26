@@ -25,10 +25,10 @@ namespace
     const float       SHADER_VAL_DIFFUSE_COEF = 0.7f;
     //    c15 is ambient color
     const unsigned    SHADER_REG_AMBIENT_COLOR = 15;
-    const D3DCOLOR    SHADER_VAL_AMBIENT_COLOR = D3DCOLOR_XRGB(13, 33, 13);
+    const D3DCOLOR    SHADER_VAL_AMBIENT_COLOR = D3DCOLOR_XRGB(20, 20, 20);
     //    c16 is point light color
     const unsigned    SHADER_REG_POINT_COLOR = 16;
-    const D3DCOLOR    SHADER_VAL_POINT_COLOR = D3DCOLOR_XRGB(25, 153, 153);
+    const D3DCOLOR    SHADER_VAL_POINT_COLOR = D3DCOLOR_XRGB(204, 204, 100);
     //    c17 is point light position
     const unsigned    SHADER_REG_POINT_POSITION = 17;
     const D3DXVECTOR3 SHADER_VAL_POINT_POSITION  (0.2f, -0.91f, 1.1f);
@@ -48,7 +48,7 @@ namespace
 }
 
 Application::Application() :
-    d3d(NULL), device(NULL), window(WINDOW_SIZE, WINDOW_SIZE), camera(3.2f, 1.5f, 0.0f), // Constants selected for better view of cylinder
+    d3d(NULL), device(NULL), window(WINDOW_SIZE, WINDOW_SIZE), camera(3.2f, 0.48f, 0), // Constants selected for better view of the scene
     point_light_enabled(true), ambient_light_enabled(true)
 {
     try

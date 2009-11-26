@@ -4,15 +4,6 @@ const DWORD TESSELATE_DEGREE = 40;
 const Index TESSELATED_VERTICES_COUNT = (TESSELATE_DEGREE+1)*(TESSELATE_DEGREE+2)/2;
 const DWORD TESSELATED_INDICES_COUNT = 3*TESSELATE_DEGREE*TESSELATE_DEGREE;
 
-namespace
-{
-    void add_triangle( Index i1, Index i2, Index i3, Index *indices, DWORD &current_index, Index offset )
-    {
-        indices[current_index++] = i1 + offset;
-        indices[current_index++] = i2 + offset;
-        indices[current_index++] = i3 + offset;
-    }
-}
 void tessellate(const Vertex *src_vertices, const Index *src_indices, DWORD src_index_offset,
                 Vertex *res_vertices, Index res_vertices_offset, Index *res_indices, D3DCOLOR color)
 // Divides each side of triangle into given number of parts

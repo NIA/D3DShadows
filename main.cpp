@@ -3,11 +3,13 @@
 #include "Model.h"
 #include "cylinder.h"
 #include "tessellate.h"
+#include "plane.h"
 
 namespace
 {
     const char *SKINNING_SHADER_FILENAME = "skinning.vsh";
     const char *MORPHING_SHADER_FILENAME = "morphing.vsh";
+    const char *PLANE_SHADER_FILENAME = "plane.vsh";
     const D3DCOLOR colors[] =
     {
         D3DCOLOR_XRGB(250, 250, 250),
@@ -16,9 +18,10 @@ namespace
         D3DCOLOR_XRGB(30, 250, 0),
         D3DCOLOR_XRGB(0, 150, 250),
     };
-    const D3DCOLOR SPHERE_COLOR = D3DCOLOR_XRGB(244, 244, 255);
-    const D3DCOLOR SECOND_CYLINDER_COLOR = D3DCOLOR_XRGB(30, 250, 0);
     const unsigned colors_count = array_size(colors);
+    const D3DCOLOR SPHERE_COLOR = D3DCOLOR_XRGB(255, 150, 0);
+    const D3DCOLOR SECOND_CYLINDER_COLOR = D3DCOLOR_XRGB(30, 250, 0);
+    const D3DCOLOR PLANE_COLOR = D3DCOLOR_XRGB(255,255,255);
 }
 
 INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
@@ -29,12 +32,15 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
     Index * cylinder_indices = NULL;
     Vertex * tesselated_vertices = NULL;
     Index * tesselated_indices = NULL;
+    Vertex * plane_vertices = NULL;
+    Index * plane_indices = NULL;
     try
     {
         Application app;
 
         VertexShader skinning_shader(app.get_device(), SKINNING_VERTEX_DECL_ARRAY, SKINNING_SHADER_FILENAME);
         VertexShader morphing_shader(app.get_device(), VERTEX_DECL_ARRAY, MORPHING_SHADER_FILENAME);
+        VertexShader plane_shader(app.get_device(), VERTEX_DECL_ARRAY, PLANE_SHADER_FILENAME);
         
         // -------------------------- C y l i n d e r -----------------------
 
@@ -124,16 +130,40 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
                                ALL_TESSELATED_INDICES_COUNT/VERTICES_PER_TRIANGLE,
                                D3DXVECTOR3(0, -1.3f, -0.2f),
                                D3DXVECTOR3(0,0,0),
-                               0.7071f);
+                               0.7071f );
 
+        // ----------------------------- P l a n e --------------------------
+        plane_vertices = new Vertex[PLANE_VERTICES_COUNT];
+        plane_indices = new Index[PLANE_INDICES_COUNT];
+        plane(7, 7, plane_vertices, plane_indices, PLANE_COLOR);
+
+        Model plane( app.get_device(),
+                     D3DPT_TRIANGLELIST,
+                     plane_shader,
+                     sizeof(Vertex),
+                     plane_vertices,
+                     PLANE_VERTICES_COUNT,
+                     plane_indices,
+                     PLANE_INDICES_COUNT,
+                     PLANE_INDICES_COUNT/VERTICES_PER_TRIANGLE,
+                     D3DXVECTOR3(0, 0, -1.2f),
+                     D3DXVECTOR3(0,0,0) );
+
+        // ---------------------------- a d d i n g -------------------------
         app.add_model(cylinder1);
         app.add_model(cylinder2);
         app.add_model(pyramid);
+        app.add_model(plane);
+
         app.run();
+
+        // -------------------------- c l e a n   u p -----------------------
         delete_array(&tesselated_indices);
         delete_array(&tesselated_vertices);
         delete_array(&cylinder_indices);
         delete_array(&cylinder_vertices);
+        delete_array(&plane_indices);
+        delete_array(&plane_vertices);
     }
     catch(RuntimeError &e)
     {
@@ -141,6 +171,8 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
         delete_array(&tesselated_vertices);
         delete_array(&cylinder_indices);
         delete_array(&cylinder_vertices);
+        delete_array(&plane_indices);
+        delete_array(&plane_vertices);
         const TCHAR *MESSAGE_BOX_TITLE = _T("Shadows error!");
         MessageBox(NULL, e.message(), MESSAGE_BOX_TITLE, MB_OK | MB_ICONERROR);
         return -1;
