@@ -10,6 +10,7 @@ namespace
     const bool        INITIAL_WIREFRAME_STATE = false;
     const D3DCOLOR    BLACK = D3DCOLOR_XRGB( 0, 0, 0 );
     const float       ROTATE_STEP = D3DX_PI/30.0f;
+    const float       POINT_MOVING_STEP = 0.03f;
     const char       *SHADOW_SHADER_FILENAME = "shadow.vsh";
 
 
@@ -53,7 +54,7 @@ namespace
 
 Application::Application() :
     d3d(NULL), device(NULL), window(WINDOW_SIZE, WINDOW_SIZE), camera(3.2f, 0.48f, 0), // Constants selected for better view of the scene
-    point_light_enabled(true), ambient_light_enabled(true), plane(NULL)
+    point_light_enabled(true), ambient_light_enabled(true), plane(NULL), point_light_position(SHADER_VAL_POINT_POSITION)
 {
     try
     {
@@ -127,13 +128,13 @@ void Application::render()
 
     D3DCOLOR ambient_color = ambient_light_enabled ? SHADER_VAL_AMBIENT_COLOR : BLACK;
     D3DCOLOR point_color = point_light_enabled ? SHADER_VAL_POINT_COLOR : BLACK;
-    D3DXMATRIX shadow_proj_matrix = plane->get_projection_matrix(SHADER_VAL_POINT_POSITION);
+    D3DXMATRIX shadow_proj_matrix = plane->get_projection_matrix(point_light_position);
 
     set_shader_matrix( SHADER_REG_VIEW_MX,        camera.get_matrix()       );
     set_shader_float ( SHADER_REG_DIFFUSE_COEF,   SHADER_VAL_DIFFUSE_COEF   );
     set_shader_color ( SHADER_REG_AMBIENT_COLOR,  ambient_color             );
     set_shader_color ( SHADER_REG_POINT_COLOR,    point_color               );
-    set_shader_point ( SHADER_REG_POINT_POSITION, SHADER_VAL_POINT_POSITION );
+    set_shader_point ( SHADER_REG_POINT_POSITION, point_light_position      );
     set_shader_vector( SHADER_REG_ATTENUATION,    SHADER_VAL_ATTENUATION    );
     set_shader_float ( SHADER_REG_SPECULAR_COEF,  SHADER_VAL_SPECULAR_COEF  );
     set_shader_float ( SHADER_REG_SPECULAR_F,     SHADER_VAL_SPECULAR_F     );
@@ -142,7 +143,7 @@ void Application::render()
     
     for ( Models::iterator iter = models.begin(); iter != models.end(); ++iter )
     {
-        draw_model( *iter, time, true );
+        draw_model( *iter, time, point_light_enabled );
     }
     draw_model( plane, time, false );
     // End the scene
@@ -206,10 +207,22 @@ void Application::process_key(unsigned code)
         camera.move_counterclockwise();
         break;
     case 'A':
-        rotate_models(-ROTATE_STEP);
+        point_light_position.y += POINT_MOVING_STEP;
         break;
     case 'D':
-        rotate_models(ROTATE_STEP);
+        point_light_position.y -= POINT_MOVING_STEP;
+        break;
+    case 'W':
+        point_light_position.x -= POINT_MOVING_STEP;
+        break;
+    case 'S':
+        point_light_position.x += POINT_MOVING_STEP;
+        break;
+    case 'R':
+        point_light_position.z += POINT_MOVING_STEP;
+        break;
+    case 'F':
+        point_light_position.z -= POINT_MOVING_STEP;
         break;
     case '1':
         point_light_enabled = !point_light_enabled;

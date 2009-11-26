@@ -26,10 +26,11 @@ private:
     Window window;
 
     Models models;
-
     Plane *plane;
 
     Camera camera;
+
+    D3DXVECTOR3 point_light_position;
 
     // Initialization steps:
     void init_device();
