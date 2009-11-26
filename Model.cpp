@@ -141,7 +141,7 @@ MorphingModel::MorphingModel(IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitiv
 
 void MorphingModel::set_time(float time)
 {
-    morphing_param = (cos(MORPHING_OMEGA*time) + 1.0f)/2.0f; // parameter of morhing: 0 to 1
+    morphing_param = (-cos(MORPHING_OMEGA*time) + 1.0f)/2.0f; // parameter of morhing: 0 to 1
 }
 
 unsigned MorphingModel::set_constants(D3DXVECTOR4 *out_data, unsigned buffer_size) const
@@ -166,9 +166,10 @@ Plane::Plane( IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitive_type, VertexS
     D3DXMATRIX rotation_mx = rotate_matrix(rotation);
     D3DXVec4Transform( &normal_4d, &normal_4d, &rotation_mx );
 
-    normal = D3DXVECTOR3( normal_4d );
+    normal = - D3DXVECTOR3( normal_4d ); // TODO: Why minus??
 
-    d = D3DXVec3Dot( &position, &normal );
+    D3DXVECTOR3 shfited_position = position - 0.0001f*normal; // to avoid z-test 
+    d = D3DXVec3Dot( &shfited_position, &normal );
 }
 
 D3DXMATRIX Plane::get_projection_matrix(const D3DXVECTOR3 light_position) const
@@ -194,10 +195,10 @@ D3DXMATRIX Plane::get_projection_matrix(const D3DXVECTOR3 light_position) const
                    L.z*n.x, L.z*n.y, L.z*n.z, 0,
                    0, 0, 0, 0 );
 
-    D3DXMATRIX Mz( 1,   0,   0,  0,
-                   0,   1,   0,  0,
-                   0,   0,   1,  0,
+    D3DXMATRIX Mz( 0,   0,   0,  0,
+                   0,   0,   0,  0,
+                   0,   0,   0,  0,
                    n.x, n.y, n.z, -L_dot_n );
 
-    return M1 + M2 + M3 + Mz;
+    return M1 - M2 + M3 + Mz;
 }

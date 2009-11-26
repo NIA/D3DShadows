@@ -32,10 +32,15 @@ VertexShader::VertexShader(IDirect3DDevice9 *device, const D3DVERTEXELEMENT9* ve
     }
 }
 
+void VertexShader::set_shader()
+{
+    check_render( device->SetVertexShader(shader) );
+}
+
 void VertexShader::set()
 {
     check_render( device->SetVertexDeclaration(vertex_decl) );
-    check_render( device->SetVertexShader(shader) );
+    set_shader();
 }
 
 void VertexShader::release_interfaces()

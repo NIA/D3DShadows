@@ -28,6 +28,7 @@ private:
     Models models;
 
     Plane *plane;
+    VertexShader *shadow_shader;
 
     Camera camera;
 
@@ -63,7 +64,7 @@ private:
     void rotate_models(float phi);
     void process_key(unsigned code);
 
-    void draw_model(Model *model, float time);
+    void draw_model(Model *model, float time, bool draw_shadow);
     void render();
 
     // Deinitialization steps:

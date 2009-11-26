@@ -10,6 +10,8 @@ namespace
     const bool        INITIAL_WIREFRAME_STATE = false;
     const D3DCOLOR    BLACK = D3DCOLOR_XRGB( 0, 0, 0 );
     const float       ROTATE_STEP = D3DX_PI/30.0f;
+    const char       *SHADOW_SHADER_FILENAME = "shadow.vsh";
+
 
     //---------------- SHADER CONSTANTS ---------------------------
     //    c0-c3 is the view matrix
@@ -31,7 +33,7 @@ namespace
     const D3DCOLOR    SHADER_VAL_POINT_COLOR = D3DCOLOR_XRGB(204, 204, 100);
     //    c17 is point light position
     const unsigned    SHADER_REG_POINT_POSITION = 17;
-    const D3DXVECTOR3 SHADER_VAL_POINT_POSITION  (0.2f, -0.91f, 1.1f);
+    const D3DXVECTOR3 SHADER_VAL_POINT_POSITION  (0.2f, -0.91f, 1.5f);
     //    c18 are attenuation constants
     const unsigned    SHADER_REG_ATTENUATION = 18;
     const D3DXVECTOR3 SHADER_VAL_ATTENUATION  (1.0f, 0, 0.5f);
@@ -45,6 +47,8 @@ namespace
     const unsigned    SHADER_REG_EYE = 21;
     //    c27-c30 is position and rotation of model matrix
     const unsigned    SHADER_REG_POS_AND_ROT_MX = 27;
+    //    c31-c34 is position and rotation of model matrix
+    const unsigned    SHADER_REG_SHADOW_PROJ_MX = 31;
 }
 
 Application::Application() :
@@ -54,6 +58,7 @@ Application::Application() :
     try
     {
         init_device();
+        shadow_shader = new VertexShader(device, VERTEX_DECL_ARRAY, SHADOW_SHADER_FILENAME);
     }
     // using catch(...) because every caught exception is rethrown
     catch(...)
@@ -86,7 +91,7 @@ void Application::init_device()
     toggle_wireframe();
 }
 
-inline void Application::draw_model(Model *model, float time)
+inline void Application::draw_model(Model *model, float time, bool draw_shadow)
 {
     static D3DXVECTOR4 model_constants[SHADER_SPACE_MODEL_DATA];
     static unsigned constants_used;
@@ -95,13 +100,21 @@ inline void Application::draw_model(Model *model, float time)
     ( model->get_shader() ).set();
 
     // Setting constants
-    model->set_time( time );
+    model->set_time( 0);//time );
     constants_used = model->set_constants( model_constants, array_size(model_constants) );
     set_shader_const( SHADER_REG_MODEL_DATA, *model_constants, constants_used );
     set_shader_matrix( SHADER_REG_POS_AND_ROT_MX, model->get_rotation_and_position() );
     
     // Draw
     model->draw();
+
+    if( draw_shadow )
+    {
+        // Shadow
+        shadow_shader->set_shader();
+        model->draw();
+    }
+
 }
 
 void Application::render()
@@ -115,6 +128,7 @@ void Application::render()
 
     D3DCOLOR ambient_color = ambient_light_enabled ? SHADER_VAL_AMBIENT_COLOR : BLACK;
     D3DCOLOR point_color = point_light_enabled ? SHADER_VAL_POINT_COLOR : BLACK;
+    D3DXMATRIX shadow_proj_matrix = plane->get_projection_matrix(SHADER_VAL_POINT_POSITION);
 
     set_shader_matrix( SHADER_REG_VIEW_MX,        camera.get_matrix()       );
     set_shader_float ( SHADER_REG_DIFFUSE_COEF,   SHADER_VAL_DIFFUSE_COEF   );
@@ -125,12 +139,13 @@ void Application::render()
     set_shader_float ( SHADER_REG_SPECULAR_COEF,  SHADER_VAL_SPECULAR_COEF  );
     set_shader_float ( SHADER_REG_SPECULAR_F,     SHADER_VAL_SPECULAR_F     );
     set_shader_point ( SHADER_REG_EYE,            camera.get_eye()          );
+    set_shader_matrix( SHADER_REG_SHADOW_PROJ_MX, shadow_proj_matrix        );
     
     for ( Models::iterator iter = models.begin(); iter != models.end(); ++iter )
     {
-        draw_model( *iter, time );
+        draw_model( *iter, time, true );
     }
-    draw_model( plane, time );
+    draw_model( plane, time, false );
     // End the scene
     check_render( device->EndScene() );
     
@@ -253,6 +268,8 @@ void Application::release_interfaces()
 {
     release_interface( d3d );
     release_interface( device );
+    if( shadow_shader != NULL)
+        delete shadow_shader;
 }
 
 Application::~Application()

@@ -15,5 +15,6 @@ private:
 public:
     VertexShader(IDirect3DDevice9 *device, const D3DVERTEXELEMENT9* vertex_declaration, const char *shader_filename);
     void set();
+    void set_shader();
     ~VertexShader();
 };

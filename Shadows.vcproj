@@ -290,6 +290,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\shadow.vsh"
+				>
+			</File>
+			<File
 				RelativePath=".\Shadows.rc"
 				>
 			</File>
