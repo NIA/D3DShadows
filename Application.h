@@ -28,7 +28,6 @@ private:
     Models models;
 
     Plane *plane;
-    VertexShader *shadow_shader;
 
     Camera camera;
 

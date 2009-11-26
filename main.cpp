@@ -8,7 +8,9 @@
 namespace
 {
     const char *SKINNING_SHADER_FILENAME = "skinning.vsh";
+    const char *SKINNING_SHADOW_SHADER_FILENAME = "skinning_shadow.vsh";
     const char *MORPHING_SHADER_FILENAME = "morphing.vsh";
+    const char *MORPHING_SHADOW_SHADER_FILENAME = "morphing_shadow.vsh";
     const char *PLANE_SHADER_FILENAME = "plane.vsh";
     const D3DCOLOR colors[] =
     {
@@ -39,7 +41,9 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
         Application app;
 
         VertexShader skinning_shader(app.get_device(), SKINNING_VERTEX_DECL_ARRAY, SKINNING_SHADER_FILENAME);
+        VertexShader skinning_shadow_shader(app.get_device(), SKINNING_VERTEX_DECL_ARRAY, SKINNING_SHADOW_SHADER_FILENAME);
         VertexShader morphing_shader(app.get_device(), VERTEX_DECL_ARRAY, MORPHING_SHADER_FILENAME);
+        VertexShader morphing_shadow_shader(app.get_device(), VERTEX_DECL_ARRAY, MORPHING_SHADOW_SHADER_FILENAME);
         VertexShader plane_shader(app.get_device(), VERTEX_DECL_ARRAY, PLANE_SHADER_FILENAME);
         
         // -------------------------- C y l i n d e r -----------------------
@@ -55,6 +59,7 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
         SkinningModel cylinder1(app.get_device(),
                                 D3DPT_TRIANGLESTRIP,
                                 skinning_shader,
+                                skinning_shadow_shader,
                                 cylinder_vertices,
                                 CYLINDER_VERTICES_COUNT,
                                 cylinder_indices,
@@ -72,6 +77,7 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
         SkinningModel cylinder2(app.get_device(),
                                 D3DPT_TRIANGLESTRIP,
                                 skinning_shader,
+                                skinning_shadow_shader,
                                 cylinder_vertices,
                                 CYLINDER_VERTICES_COUNT,
                                 cylinder_indices,
@@ -123,6 +129,7 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
         MorphingModel pyramid( app.get_device(),
                                D3DPT_TRIANGLELIST,
                                morphing_shader,
+                               morphing_shadow_shader,
                                tesselated_vertices,
                                ALL_TESSELATED_VERTICES_COUNT,
                                tesselated_indices,

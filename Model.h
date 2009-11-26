@@ -8,6 +8,7 @@ class Model
 private:
     IDirect3DDevice9    *device;
     VertexShader        &shader;
+    VertexShader        &shadow_shader;
 
     unsigned    vertices_count;
     unsigned    primitives_count;
@@ -29,6 +30,7 @@ public:
     Model(  IDirect3DDevice9 *device,
             D3DPRIMITIVETYPE primitive_type,
             VertexShader &shader,
+            VertexShader &shadow_shader,
             unsigned vertex_size,
             const Vertex *vertices,
             unsigned vertices_count,
@@ -39,6 +41,7 @@ public:
             D3DXVECTOR3 rotation);
     
     VertexShader &get_shader();
+    VertexShader &get_shadow_shader();
     virtual void set_time(float time) { UNREFERENCED_PARAMETER(time); }
     
     // set_constants() returns number of constants used
@@ -65,6 +68,7 @@ public:
     SkinningModel(  IDirect3DDevice9 *device,
                     D3DPRIMITIVETYPE primitive_type,
                     VertexShader &shader,
+                    VertexShader &shadow_shader,
                     const SkinningVertex *vertices,
                     unsigned vertices_count,
                     const Index *indices,
@@ -88,6 +92,7 @@ public:
     MorphingModel(  IDirect3DDevice9 *device,
                     D3DPRIMITIVETYPE primitive_type,
                     VertexShader &shader,
+                    VertexShader &shadow_shader,
                     const Vertex *vertices,
                     unsigned vertices_count,
                     const Index *indices,

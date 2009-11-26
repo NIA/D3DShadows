@@ -286,11 +286,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\plane.vsh"
+				RelativePath=".\morphing_shadow.vsh"
 				>
 			</File>
 			<File
-				RelativePath=".\shadow.vsh"
+				RelativePath=".\plane.vsh"
 				>
 			</File>
 			<File
@@ -299,6 +299,10 @@
 			</File>
 			<File
 				RelativePath=".\skinning.vsh"
+				>
+			</File>
+			<File
+				RelativePath=".\skinning_shadow.vsh"
 				>
 			</File>
 		</Filter>

@@ -15,13 +15,13 @@ namespace
 
 extern const unsigned VECTORS_IN_MATRIX;
 
-Model::Model(   IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitive_type, VertexShader &shader, unsigned vertex_size,
+Model::Model(   IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitive_type, VertexShader &shader, VertexShader &shadow_shader, unsigned vertex_size,
                 const Vertex *vertices, unsigned vertices_count, const Index *indices, unsigned indices_count,
                 unsigned primitives_count, D3DXVECTOR3 position, D3DXVECTOR3 rotation )
  
 : device(device), vertices_count(vertices_count), primitives_count(primitives_count),
   primitive_type(primitive_type), vertex_buffer(NULL), index_buffer(NULL),
-  position(position), rotation(rotation), vertex_size(vertex_size), shader(shader)
+  position(position), rotation(rotation), vertex_size(vertex_size), shader(shader), shadow_shader(shadow_shader)
 {
     _ASSERT(vertices != NULL);
     _ASSERT(indices != NULL);
@@ -66,6 +66,11 @@ VertexShader &Model::get_shader()
     return shader;
 }
 
+VertexShader &Model::get_shadow_shader()
+{
+    return shadow_shader;
+}
+
 void Model::draw() const
 {
     check_render( device->SetStreamSource( 0, vertex_buffer, 0, vertex_size ) );
@@ -102,10 +107,10 @@ Model::~Model()
 
 // -------------------------------------- SkinningModel -------------------------------------------------------------
 
-SkinningModel::SkinningModel(IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitive_type, VertexShader &shader,
+SkinningModel::SkinningModel(IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitive_type, VertexShader &shader, VertexShader &shadow_shader,
                              const SkinningVertex *vertices, unsigned int vertices_count, const Index *indices, unsigned int indices_count,
                              unsigned int primitives_count, D3DXVECTOR3 position, D3DXVECTOR3 rotation, D3DXVECTOR3 bone_center)
-: Model(device, primitive_type, shader, sizeof(SkinningVertex), vertices, vertices_count, indices, indices_count, primitives_count, position, rotation),
+: Model(device, primitive_type, shader, shadow_shader, sizeof(SkinningVertex), vertices, vertices_count, indices, indices_count, primitives_count, position, rotation),
   bone_center(bone_center)
 {
     _ASSERT( BONES_COUNT <= sizeof(D3DXVECTOR4) ); // to fit weights into vertex shader register
@@ -131,10 +136,10 @@ unsigned SkinningModel::set_constants(D3DXVECTOR4 *out_data, unsigned buffer_siz
 
 // -------------------------------------- MorphingModel -------------------------------------------------------------
 
-MorphingModel::MorphingModel(IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitive_type, VertexShader &shader,
+MorphingModel::MorphingModel(IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitive_type, VertexShader &shader, VertexShader &shadow_shader,
                              const Vertex *vertices, unsigned int vertices_count, const Index *indices, unsigned int indices_count,
                              unsigned int primitives_count, D3DXVECTOR3 position, D3DXVECTOR3 rotation, float final_radius)
-: Model(device, primitive_type, shader, sizeof(Vertex), vertices, vertices_count, indices, indices_count, primitives_count, position, rotation),
+: Model(device, primitive_type, shader, shadow_shader, sizeof(Vertex), vertices, vertices_count, indices, indices_count, primitives_count, position, rotation),
   morphing_param(1), final_radius(final_radius)
 {
 }
@@ -158,7 +163,7 @@ unsigned MorphingModel::set_constants(D3DXVECTOR4 *out_data, unsigned buffer_siz
 Plane::Plane( IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitive_type, VertexShader &shader, const Vertex *vertices,
               unsigned vertices_count, const Index *indices, unsigned indices_count, unsigned primitives_count,
               D3DXVECTOR3 position, D3DXVECTOR3 rotation )
-: Model(device, primitive_type, shader, sizeof(Vertex), vertices, vertices_count, indices, indices_count,
+: Model(device, primitive_type, shader, shader, sizeof(Vertex), vertices, vertices_count, indices, indices_count,
         primitives_count, position, rotation)
 {
     _ASSERT( vertices_count > 0 );

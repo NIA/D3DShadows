@@ -58,7 +58,6 @@ Application::Application() :
     try
     {
         init_device();
-        shadow_shader = new VertexShader(device, VERTEX_DECL_ARRAY, SHADOW_SHADER_FILENAME);
     }
     // using catch(...) because every caught exception is rethrown
     catch(...)
@@ -100,7 +99,7 @@ inline void Application::draw_model(Model *model, float time, bool draw_shadow)
     ( model->get_shader() ).set();
 
     // Setting constants
-    model->set_time( 0);//time );
+    model->set_time( time );
     constants_used = model->set_constants( model_constants, array_size(model_constants) );
     set_shader_const( SHADER_REG_MODEL_DATA, *model_constants, constants_used );
     set_shader_matrix( SHADER_REG_POS_AND_ROT_MX, model->get_rotation_and_position() );
@@ -111,7 +110,7 @@ inline void Application::draw_model(Model *model, float time, bool draw_shadow)
     if( draw_shadow )
     {
         // Shadow
-        shadow_shader->set_shader();
+        ( model->get_shadow_shader() ).set_shader();
         model->draw();
     }
 
@@ -268,8 +267,6 @@ void Application::release_interfaces()
 {
     release_interface( d3d );
     release_interface( device );
-    if( shadow_shader != NULL)
-        delete shadow_shader;
 }
 
 Application::~Application()
