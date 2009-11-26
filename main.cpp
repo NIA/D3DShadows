@@ -137,10 +137,9 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
         plane_indices = new Index[PLANE_INDICES_COUNT];
         plane(7, 7, plane_vertices, plane_indices, PLANE_COLOR);
 
-        Model plane( app.get_device(),
+        Plane plane( app.get_device(),
                      D3DPT_TRIANGLELIST,
                      plane_shader,
-                     sizeof(Vertex),
                      plane_vertices,
                      PLANE_VERTICES_COUNT,
                      plane_indices,
@@ -153,7 +152,7 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
         app.add_model(cylinder1);
         app.add_model(cylinder2);
         app.add_model(pyramid);
-        app.add_model(plane);
+        app.set_plane(plane);
 
         app.run();
 

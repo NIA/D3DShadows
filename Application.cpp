@@ -49,7 +49,7 @@ namespace
 
 Application::Application() :
     d3d(NULL), device(NULL), window(WINDOW_SIZE, WINDOW_SIZE), camera(3.2f, 0.48f, 0), // Constants selected for better view of the scene
-    point_light_enabled(true), ambient_light_enabled(true)
+    point_light_enabled(true), ambient_light_enabled(true), plane(NULL)
 {
     try
     {
@@ -86,6 +86,24 @@ void Application::init_device()
     toggle_wireframe();
 }
 
+inline void Application::draw_model(Model *model, float time)
+{
+    static D3DXVECTOR4 model_constants[SHADER_SPACE_MODEL_DATA];
+    static unsigned constants_used;
+
+    // Set up
+    ( model->get_shader() ).set();
+
+    // Setting constants
+    model->set_time( time );
+    constants_used = model->set_constants( model_constants, array_size(model_constants) );
+    set_shader_const( SHADER_REG_MODEL_DATA, *model_constants, constants_used );
+    set_shader_matrix( SHADER_REG_POS_AND_ROT_MX, model->get_rotation_and_position() );
+    
+    // Draw
+    model->draw();
+}
+
 void Application::render()
 {
     check_render( device->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, BACKGROUND_COLOR, 1.0f, 0 ) );
@@ -98,32 +116,21 @@ void Application::render()
     D3DCOLOR ambient_color = ambient_light_enabled ? SHADER_VAL_AMBIENT_COLOR : BLACK;
     D3DCOLOR point_color = point_light_enabled ? SHADER_VAL_POINT_COLOR : BLACK;
 
-    set_shader_matrix( SHADER_REG_VIEW_MX,            camera.get_matrix());
-    set_shader_float(  SHADER_REG_DIFFUSE_COEF,       SHADER_VAL_DIFFUSE_COEF);
-    set_shader_color(  SHADER_REG_AMBIENT_COLOR,      ambient_color);
-    set_shader_color(  SHADER_REG_POINT_COLOR,        point_color);
-    set_shader_point(  SHADER_REG_POINT_POSITION,     SHADER_VAL_POINT_POSITION);
-    set_shader_vector( SHADER_REG_ATTENUATION,        SHADER_VAL_ATTENUATION);
-    set_shader_float(  SHADER_REG_SPECULAR_COEF,      SHADER_VAL_SPECULAR_COEF);
-    set_shader_float(  SHADER_REG_SPECULAR_F,         SHADER_VAL_SPECULAR_F);
-    set_shader_point(  SHADER_REG_EYE,                camera.get_eye());
+    set_shader_matrix( SHADER_REG_VIEW_MX,        camera.get_matrix()       );
+    set_shader_float ( SHADER_REG_DIFFUSE_COEF,   SHADER_VAL_DIFFUSE_COEF   );
+    set_shader_color ( SHADER_REG_AMBIENT_COLOR,  ambient_color             );
+    set_shader_color ( SHADER_REG_POINT_COLOR,    point_color               );
+    set_shader_point ( SHADER_REG_POINT_POSITION, SHADER_VAL_POINT_POSITION );
+    set_shader_vector( SHADER_REG_ATTENUATION,    SHADER_VAL_ATTENUATION    );
+    set_shader_float ( SHADER_REG_SPECULAR_COEF,  SHADER_VAL_SPECULAR_COEF  );
+    set_shader_float ( SHADER_REG_SPECULAR_F,     SHADER_VAL_SPECULAR_F     );
+    set_shader_point ( SHADER_REG_EYE,            camera.get_eye()          );
     
-    D3DXVECTOR4 model_constants[SHADER_SPACE_MODEL_DATA];
-    unsigned constants_used;
     for ( Models::iterator iter = models.begin(); iter != models.end(); ++iter )
     {
-        // Set up
-        ( (*iter)->get_shader() ).set();
-
-        // Setting constants
-        (*iter)->set_time(time);
-        constants_used = (*iter)->set_constants(model_constants, array_size(model_constants));
-        set_shader_const(SHADER_REG_MODEL_DATA, *model_constants, constants_used);
-        set_shader_matrix( SHADER_REG_POS_AND_ROT_MX, (*iter)->get_rotation_and_position() );
-        
-        // Draw
-        (*iter)->draw();
+        draw_model( *iter, time );
     }
+    draw_model( plane, time );
     // End the scene
     check_render( device->EndScene() );
     
@@ -201,6 +208,9 @@ void Application::process_key(unsigned code)
 
 void Application::run()
 {
+    if( plane == NULL )
+        throw NoPlaneError();
+
     window.show();
     window.update();
 

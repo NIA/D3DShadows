@@ -101,3 +101,24 @@ public:
     virtual void set_time(float time);
     virtual unsigned set_constants(D3DXVECTOR4 *out_data, unsigned buffer_size) const; // returns number of constants used
 };
+
+class Plane : public Model
+{
+private:
+    D3DXVECTOR3 normal;
+    float d; // coeff. in plane equation (x,n)=d
+public:
+    Plane(  IDirect3DDevice9 *device,
+            D3DPRIMITIVETYPE primitive_type,
+            VertexShader &shader,
+            const Vertex *vertices,
+            unsigned vertices_count,
+            const Index *indices,
+            unsigned indices_count,
+            unsigned primitives_count,
+            D3DXVECTOR3 position,
+            D3DXVECTOR3 rotation);
+
+    D3DXMATRIX get_projection_matrix(const D3DXVECTOR3 light_position) const;
+};
+

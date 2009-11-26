@@ -66,6 +66,11 @@ class RenderStateError : public RuntimeError
 public:
     RenderStateError() : RuntimeError( _T("Error while setting render state") ) {}
 };
+class NoPlaneError : public RuntimeError
+{
+public:
+    NoPlaneError() : RuntimeError( _T("Error: attempting to run loop when no plane set") ) {}
+};
 
 inline void check_render( HRESULT res )
 {

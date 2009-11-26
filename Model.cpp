@@ -129,7 +129,7 @@ unsigned SkinningModel::set_constants(D3DXVECTOR4 *out_data, unsigned buffer_siz
     return BONES_COUNT*VECTORS_IN_MATRIX;
 }
 
-// -------------------------------------- SkinningModel -------------------------------------------------------------
+// -------------------------------------- MorphingModel -------------------------------------------------------------
 
 MorphingModel::MorphingModel(IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitive_type, VertexShader &shader,
                              const Vertex *vertices, unsigned int vertices_count, const Index *indices, unsigned int indices_count,
@@ -151,4 +151,53 @@ unsigned MorphingModel::set_constants(D3DXVECTOR4 *out_data, unsigned buffer_siz
     out_data[0] = D3DXVECTOR4(final_radius, final_radius, final_radius, final_radius);
     out_data[1] = D3DXVECTOR4(morphing_param, morphing_param, morphing_param, morphing_param);
     return MORPHING_CONSTANTS_USED;
+}
+
+// ------------------------------------------ Plane --------------------------------------------------------
+
+Plane::Plane( IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitive_type, VertexShader &shader, const Vertex *vertices,
+              unsigned vertices_count, const Index *indices, unsigned indices_count, unsigned primitives_count,
+              D3DXVECTOR3 position, D3DXVECTOR3 rotation )
+: Model(device, primitive_type, shader, sizeof(Vertex), vertices, vertices_count, indices, indices_count,
+        primitives_count, position, rotation)
+{
+    _ASSERT( vertices_count > 0 );
+    D3DXVECTOR4 normal_4d = vertices[0].normal;
+    D3DXMATRIX rotation_mx = rotate_matrix(rotation);
+    D3DXVec4Transform( &normal_4d, &normal_4d, &rotation_mx );
+
+    normal = D3DXVECTOR3( normal_4d );
+
+    d = D3DXVec3Dot( &position, &normal );
+}
+
+D3DXMATRIX Plane::get_projection_matrix(const D3DXVECTOR3 light_position) const
+{
+    // some aliases
+    D3DXVECTOR3 const &n = normal;
+    D3DXVECTOR3 const &L = light_position;
+
+    float L_dot_n = D3DXVec3Dot(&L, &n);
+
+    D3DXMATRIX M1( d, 0, 0, -d*L.x,
+                   0, d, 0, -d*L.y,
+                   0, 0, d, -d*L.z,
+                   0, 0, 0,  0 );
+
+    D3DXMATRIX M2( L_dot_n,       0,       0, 0,
+                         0, L_dot_n,       0, 0,
+                         0,       0, L_dot_n, 0,
+                         0,       0,       0, 0 );
+
+    D3DXMATRIX M3( L.x*n.x, L.x*n.y, L.x*n.z, 0,
+                   L.y*n.x, L.y*n.y, L.y*n.z, 0,
+                   L.z*n.x, L.z*n.y, L.z*n.z, 0,
+                   0, 0, 0, 0 );
+
+    D3DXMATRIX Mz( 1,   0,   0,  0,
+                   0,   1,   0,  0,
+                   0,   0,   1,  0,
+                   n.x, n.y, n.z, -L_dot_n );
+
+    return M1 + M2 + M3 + Mz;
 }

@@ -27,6 +27,8 @@ private:
 
     Models models;
 
+    Plane *plane;
+
     Camera camera;
 
     // Initialization steps:
@@ -61,6 +63,7 @@ private:
     void rotate_models(float phi);
     void process_key(unsigned code);
 
+    void draw_model(Model *model, float time);
     void render();
 
     // Deinitialization steps:
@@ -71,6 +74,7 @@ public:
     IDirect3DDevice9 * get_device();
 
     void add_model(Model &model);
+    void set_plane(Plane &_plane) { plane = &_plane; }
     void remove_model(Model &model);
     void run();
 
