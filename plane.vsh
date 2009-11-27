@@ -65,24 +65,6 @@ mul r4, r4, c14.x        ; r4 *= coef(diffuse)
 mul r4, r4, r0.x        ; r4 *= attenuation
 
 max r6, r4, c100        ; if some color comp. < 0 => make it == 0
-; - - - - - - - - - - - specular - - - - - - - - - - - - - -;
-; calculating r:
-mul r2, r10, r5.x   ; r2 = (l, n)*n
-add r2, r2, r2      ; r2 = 2*(l, n)*n
-add r2, r2, -r11    ; r2 = 2*(l, n)*n - l
-; calculating cos(phi)**f
-dp3 r8, r2, r9          ; r8 = cos(phi)
-max r8, r8, c100        ; if cos < 0, let it = 0
-mov r7.y, r8.x
-mov r7.w, c20.x
-lit r8, r7              ; r8.z = cos(phi)**f
-
-mul r4, c16, r8.z       ; r4 = I(point)*cos(phi)**f
-mul r4, r4, c19.x       ; r4 *= coef(specular)
-mul r4, r4, r0.x        ; r4 *= attenuation
-
-max r4, r4, c100        ; if some color comp. < 0 => make it == 0
-add r6, r6, r4
 
 ;;;;;;;;;;;;;;;;;;;;;;; Ambient ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 add r6, r6, c15         ; r6 += I(ambient)
