@@ -12,6 +12,7 @@ namespace
     const float       ROTATE_STEP = D3DX_PI/30.0f;
     const float       POINT_MOVING_STEP = 0.03f;
     const char       *SHADOW_SHADER_FILENAME = "shadow.vsh";
+    const DWORD       STENCIL_REF_VALUE = 1;
 
 
     //---------------- SHADER CONSTANTS ---------------------------
@@ -43,7 +44,7 @@ namespace
     const float       SHADER_VAL_SPECULAR_COEF = 0.4f;
     //    c20 is specular constant 'f'
     const unsigned    SHADER_REG_SPECULAR_F = 20;
-    const float       SHADER_VAL_SPECULAR_F = 15.0f;
+    const float       SHADER_VAL_SPECULAR_F = 35.0f;
     //    c21 is eye position
     const unsigned    SHADER_REG_EYE = 21;
     //    c27-c30 is position and rotation of model matrix
@@ -81,13 +82,22 @@ void Application::init_device()
     present_parameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
     present_parameters.BackBufferFormat = D3DFMT_UNKNOWN;
     present_parameters.EnableAutoDepthStencil = TRUE;
-    present_parameters.AutoDepthStencilFormat = D3DFMT_D16;
+    present_parameters.AutoDepthStencilFormat = D3DFMT_D24S8;
     // Create the device
     if( FAILED( d3d->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, window,
                                       D3DCREATE_HARDWARE_VERTEXPROCESSING,
                                       &present_parameters, &device ) ) )
         throw D3DInitError();
     check_state( device->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE ) );
+    // Enable stencil testing
+    check_state( device->SetRenderState(D3DRS_STENCILENABLE, TRUE) );
+    // Specify the stencil comparison function
+    check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL) );
+    // Set the comparison reference value
+    check_state( device->SetRenderState(D3DRS_STENCILREF, STENCIL_REF_VALUE) );
+    //  Specify a stencil mask 
+    device->SetRenderState(D3DRS_STENCILMASK, 0xff);
+
     toggle_wireframe();
 }
 
@@ -106,12 +116,14 @@ inline void Application::draw_model(Model *model, float time, bool draw_shadow)
     set_shader_matrix( SHADER_REG_POS_AND_ROT_MX, model->get_rotation_and_position() );
     
     // Draw
+    check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS) );
     model->draw();
 
     if( draw_shadow )
     {
         // Shadow
         ( model->get_shadow_shader() ).set_shader();
+        check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL) );
         model->draw();
     }
 
@@ -119,7 +131,7 @@ inline void Application::draw_model(Model *model, float time, bool draw_shadow)
 
 void Application::render()
 {
-    check_render( device->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, BACKGROUND_COLOR, 1.0f, 0 ) );
+    check_render( device->Clear( 0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, BACKGROUND_COLOR, 1.0f, 0 ) );
     
     // Begin the scene
     check_render( device->BeginScene() );
@@ -140,12 +152,15 @@ void Application::render()
     set_shader_float ( SHADER_REG_SPECULAR_F,     SHADER_VAL_SPECULAR_F     );
     set_shader_point ( SHADER_REG_EYE,            camera.get_eye()          );
     set_shader_matrix( SHADER_REG_SHADOW_PROJ_MX, shadow_proj_matrix        );
-    
+
+    check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS) );
+    check_state( device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE) );
+    draw_model( plane, time, false );
+    check_state( device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP) );
     for ( Models::iterator iter = models.begin(); iter != models.end(); ++iter )
     {
         draw_model( *iter, time, point_light_enabled );
     }
-    draw_model( plane, time, false );
     // End the scene
     check_render( device->EndScene() );
     
