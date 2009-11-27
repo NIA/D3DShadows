@@ -101,13 +101,11 @@ void Application::init_device()
     toggle_wireframe();
 }
 
-inline void Application::draw_model(Model *model, float time, bool draw_shadow)
+inline void Application::draw_model(Model *model, float time, bool shadow)
 {
     static D3DXVECTOR4 model_constants[SHADER_SPACE_MODEL_DATA];
     static unsigned constants_used;
 
-    // Set up
-    ( model->get_shader() ).set();
 
     // Setting constants
     model->set_time( time );
@@ -116,17 +114,16 @@ inline void Application::draw_model(Model *model, float time, bool draw_shadow)
     set_shader_matrix( SHADER_REG_POS_AND_ROT_MX, model->get_rotation_and_position() );
     
     // Draw
-    check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS) );
-    model->draw();
-
-    if( draw_shadow )
+    if( shadow )
     {
         // Shadow
-        ( model->get_shadow_shader() ).set_shader();
-        check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL) );
-        model->draw();
+        ( model->get_shadow_shader() ).set();
     }
-
+    else
+    {
+        ( model->get_shader() ).set();
+    }
+    model->draw();
 }
 
 void Application::render()
@@ -157,9 +154,22 @@ void Application::render()
     check_state( device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE) );
     draw_model( plane, time, false );
     check_state( device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP) );
+    if ( point_light_enabled )
+    {
+        // Draw shadows if point_light_enabled
+        check_state( device->SetRenderState(D3DRS_ZENABLE, FALSE) );
+        check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL) );
+        for ( Models::iterator iter = models.begin(); iter != models.end(); ++iter )
+        {
+            draw_model( *iter, time, true );
+        }
+    }
+    check_state( device->SetRenderState(D3DRS_ZENABLE, TRUE) );
+    check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS) );
     for ( Models::iterator iter = models.begin(); iter != models.end(); ++iter )
     {
-        draw_model( *iter, time, point_light_enabled );
+        // Draw models
+        draw_model( *iter, time, false );
     }
     // End the scene
     check_render( device->EndScene() );

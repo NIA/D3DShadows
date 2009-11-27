@@ -64,7 +64,7 @@ private:
     void rotate_models(float phi);
     void process_key(unsigned code);
 
-    void draw_model(Model *model, float time, bool draw_shadow);
+    void draw_model(Model *model, float time, bool shadow);
     void render();
 
     // Deinitialization steps:

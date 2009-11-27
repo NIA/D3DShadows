@@ -173,8 +173,7 @@ Plane::Plane( IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitive_type, VertexS
 
     normal = - D3DXVECTOR3( normal_4d ); // TODO: Why minus??
 
-    D3DXVECTOR3 shfited_position = position - 0.0001f*normal; // to avoid z-test 
-    d = D3DXVec3Dot( &shfited_position, &normal );
+    d = D3DXVec3Dot( &position, &normal );
 }
 
 D3DXMATRIX Plane::get_projection_matrix(const D3DXVECTOR3 light_position) const
