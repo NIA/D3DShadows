@@ -94,12 +94,13 @@ void Application::init_device()
     check_state( device->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE ) );
     // Enable stencil testing
     check_state( device->SetRenderState(D3DRS_STENCILENABLE, TRUE) );
-    // Specify the stencil comparison function
-    check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL) );
     // Set the comparison reference value
     check_state( device->SetRenderState(D3DRS_STENCILREF, STENCIL_REF_VALUE) );
     //  Specify a stencil mask 
     device->SetRenderState(D3DRS_STENCILMASK, 0xff);
+    //  Configure alpha-blending
+    check_state( device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA) );
+    check_state( device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA) );
 
     toggle_wireframe();
 }
@@ -154,29 +155,27 @@ void Application::render()
     set_shader_matrix( SHADER_REG_SHADOW_PROJ_MX, shadow_proj_matrix        );
     set_shader_vector( SHADER_REG_SHADOW_ATTENUATION, SHADER_VAL_SHADOW_ATTENUATION );
 
-    check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS) );
+    // Draw Plane
     check_state( device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE) );
     draw_model( plane, time, false );
+    // Draw shadows if point_light_enabled
+    check_state( device->SetRenderState(D3DRS_ZENABLE, FALSE) );
+    check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL) );
+    check_state( device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCRSAT) );
+    check_state( device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE) );
     if ( point_light_enabled )
     {
-        // Draw shadows if point_light_enabled
-        check_state( device->SetRenderState(D3DRS_ZENABLE, FALSE) );
-        check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL) );
-        check_state( device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCRSAT) );
-        check_state( device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE) );
-        check_state( device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA) );
-        check_state( device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA) );
         for ( Models::iterator iter = models.begin(); iter != models.end(); ++iter )
         {
             draw_model( *iter, time, true );
         }
     }
+    // Draw models
     check_state( device->SetRenderState(D3DRS_ZENABLE, TRUE) );
     check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS) );
     check_state( device->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE) );
     for ( Models::iterator iter = models.begin(); iter != models.end(); ++iter )
     {
-        // Draw models
         draw_model( *iter, time, false );
     }
     // End the scene
