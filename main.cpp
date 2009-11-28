@@ -14,11 +14,11 @@ namespace
     const char *PLANE_SHADER_FILENAME = "plane.vsh";
     const D3DCOLOR colors[] =
     {
-        D3DCOLOR_XRGB(250, 250, 250),
         D3DCOLOR_XRGB(250, 30, 10),
         D3DCOLOR_XRGB(250, 250, 0),
         D3DCOLOR_XRGB(30, 250, 0),
         D3DCOLOR_XRGB(0, 150, 250),
+        D3DCOLOR_XRGB(250, 250, 250),
     };
     const unsigned colors_count = array_size(colors);
     const D3DCOLOR SPHERE_COLOR = D3DCOLOR_XRGB(255, 150, 0);

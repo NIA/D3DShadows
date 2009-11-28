@@ -53,11 +53,11 @@ namespace
     const unsigned    SHADER_REG_SHADOW_PROJ_MX = 31;
     //    c35 are attenuation constants
     const unsigned    SHADER_REG_SHADOW_ATTENUATION = 35;
-    const D3DXVECTOR3 SHADER_VAL_SHADOW_ATTENUATION  (0.2f, 0, 0.1f);
+    const D3DXVECTOR3 SHADER_VAL_SHADOW_ATTENUATION  (0.8f, 0, 0.1f);
 }
 
 Application::Application() :
-    d3d(NULL), device(NULL), window(WINDOW_SIZE, WINDOW_SIZE), camera(3.2f, 0.48f, 0), // Constants selected for better view of the scene
+    d3d(NULL), device(NULL), window(WINDOW_SIZE, WINDOW_SIZE), camera(5, 0.48f, 0), // Constants selected for better view of the scene
     point_light_enabled(true), ambient_light_enabled(true), plane(NULL), point_light_position(SHADER_VAL_POINT_POSITION)
 {
     try
@@ -141,11 +141,6 @@ void Application::render()
     D3DCOLOR ambient_color = ambient_light_enabled ? SHADER_VAL_AMBIENT_COLOR : BLACK;
     D3DCOLOR point_color = point_light_enabled ? SHADER_VAL_POINT_COLOR : BLACK;
     D3DXMATRIX shadow_proj_matrix = plane->get_projection_matrix(point_light_position);
-
-    //D3DXVECTOR4 temp (0.1f,0.2f,point_light_position.z,1);
-    //D3DXMATRIX temp_mx;
-    //D3DXMatrixTranspose(&temp_mx, &shadow_proj_matrix);
-    //D3DXVec4Transform(&temp, &temp, &temp_mx);
 
     set_shader_matrix( SHADER_REG_VIEW_MX,        camera.get_matrix()       );
     set_shader_float ( SHADER_REG_DIFFUSE_COEF,   SHADER_VAL_DIFFUSE_COEF   );
