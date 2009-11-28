@@ -142,7 +142,7 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
         // ----------------------------- P l a n e --------------------------
         plane_vertices = new Vertex[PLANE_VERTICES_COUNT];
         plane_indices = new Index[PLANE_INDICES_COUNT];
-        plane(7, 7, plane_vertices, plane_indices, PLANE_COLOR);
+        plane(40, 40, plane_vertices, plane_indices, PLANE_COLOR); // special for cypok
 
         Plane plane( app.get_device(),
                      D3DPT_TRIANGLELIST,

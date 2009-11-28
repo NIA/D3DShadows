@@ -12,7 +12,7 @@ namespace
     const float       ROTATE_STEP = D3DX_PI/30.0f;
     const float       POINT_MOVING_STEP = 0.03f;
     const char       *SHADOW_SHADER_FILENAME = "shadow.vsh";
-    const DWORD       STENCIL_REF_VALUE = 1;
+    const DWORD       STENCIL_REF_VALUE = 50;
 
 
     //---------------- SHADER CONSTANTS ---------------------------
@@ -49,8 +49,11 @@ namespace
     const unsigned    SHADER_REG_EYE = 21;
     //    c27-c30 is position and rotation of model matrix
     const unsigned    SHADER_REG_POS_AND_ROT_MX = 27;
-    //    c31-c34 is position and rotation of model matrix
+    //    c31-c34 is shadow projection matrix
     const unsigned    SHADER_REG_SHADOW_PROJ_MX = 31;
+    //    c35 are attenuation constants
+    const unsigned    SHADER_REG_SHADOW_ATTENUATION = 35;
+    const D3DXVECTOR3 SHADER_VAL_SHADOW_ATTENUATION  (0.2f, 0, 0.1f);
 }
 
 Application::Application() :
@@ -139,6 +142,11 @@ void Application::render()
     D3DCOLOR point_color = point_light_enabled ? SHADER_VAL_POINT_COLOR : BLACK;
     D3DXMATRIX shadow_proj_matrix = plane->get_projection_matrix(point_light_position);
 
+    //D3DXVECTOR4 temp (0.1f,0.2f,point_light_position.z,1);
+    //D3DXMATRIX temp_mx;
+    //D3DXMatrixTranspose(&temp_mx, &shadow_proj_matrix);
+    //D3DXVec4Transform(&temp, &temp, &temp_mx);
+
     set_shader_matrix( SHADER_REG_VIEW_MX,        camera.get_matrix()       );
     set_shader_float ( SHADER_REG_DIFFUSE_COEF,   SHADER_VAL_DIFFUSE_COEF   );
     set_shader_color ( SHADER_REG_AMBIENT_COLOR,  ambient_color             );
@@ -149,16 +157,20 @@ void Application::render()
     set_shader_float ( SHADER_REG_SPECULAR_F,     SHADER_VAL_SPECULAR_F     );
     set_shader_point ( SHADER_REG_EYE,            camera.get_eye()          );
     set_shader_matrix( SHADER_REG_SHADOW_PROJ_MX, shadow_proj_matrix        );
+    set_shader_vector( SHADER_REG_SHADOW_ATTENUATION, SHADER_VAL_SHADOW_ATTENUATION );
 
     check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS) );
     check_state( device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE) );
     draw_model( plane, time, false );
-    check_state( device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_KEEP) );
     if ( point_light_enabled )
     {
         // Draw shadows if point_light_enabled
         check_state( device->SetRenderState(D3DRS_ZENABLE, FALSE) );
         check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL) );
+        check_state( device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCRSAT) );
+        check_state( device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE) );
+        check_state( device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA) );
+        check_state( device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA) );
         for ( Models::iterator iter = models.begin(); iter != models.end(); ++iter )
         {
             draw_model( *iter, time, true );
@@ -166,6 +178,7 @@ void Application::render()
     }
     check_state( device->SetRenderState(D3DRS_ZENABLE, TRUE) );
     check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS) );
+    check_state( device->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE) );
     for ( Models::iterator iter = models.begin(); iter != models.end(); ++iter )
     {
         // Draw models
