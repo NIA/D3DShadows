@@ -60,6 +60,11 @@ private:
     {
         set_shader_const(reg, D3DXCOLOR(color), 1);
     }
+    // Wrapper for SetRenderState:
+    void set_render_state( D3DRENDERSTATETYPE state, DWORD value )
+    {
+        check_state( device->SetRenderState(state, value) );
+    }
 
     void rotate_models(float phi);
     void process_key(unsigned code);

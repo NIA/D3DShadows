@@ -38,7 +38,7 @@ namespace
     const D3DXVECTOR3 SHADER_VAL_POINT_POSITION  (0.2f, -0.91f, 1.5f);
     //    c18 are attenuation constants
     const unsigned    SHADER_REG_ATTENUATION = 18;
-    const D3DXVECTOR3 SHADER_VAL_ATTENUATION  (1.0f, 0, 0.5f);
+    const D3DXVECTOR3 SHADER_VAL_ATTENUATION  (1.0f, 0, 0.3f);
     //    c19 is specular coefficient
     const unsigned    SHADER_REG_SPECULAR_COEF = 19;
     const float       SHADER_VAL_SPECULAR_COEF = 0.4f;
@@ -57,7 +57,7 @@ namespace
 }
 
 Application::Application() :
-    d3d(NULL), device(NULL), window(WINDOW_SIZE, WINDOW_SIZE), camera(5, 0.48f, 0), // Constants selected for better view of the scene
+    d3d(NULL), device(NULL), window(WINDOW_SIZE, WINDOW_SIZE), camera(5, 0.68f, 0), // Constants selected for better view of the scene
     point_light_enabled(true), ambient_light_enabled(true), plane(NULL), point_light_position(SHADER_VAL_POINT_POSITION)
 {
     try
@@ -90,17 +90,20 @@ void Application::init_device()
     if( FAILED( d3d->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, window,
                                       D3DCREATE_HARDWARE_VERTEXPROCESSING,
                                       &present_parameters, &device ) ) )
+    {
         throw D3DInitError();
-    check_state( device->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE ) );
+    }
+
+    set_render_state( D3DRS_CULLMODE, D3DCULL_NONE );
     // Enable stencil testing
-    check_state( device->SetRenderState(D3DRS_STENCILENABLE, TRUE) );
+    set_render_state( D3DRS_STENCILENABLE, TRUE );
     // Set the comparison reference value
-    check_state( device->SetRenderState(D3DRS_STENCILREF, STENCIL_REF_VALUE) );
+    set_render_state( D3DRS_STENCILREF, STENCIL_REF_VALUE );
     //  Specify a stencil mask 
-    device->SetRenderState(D3DRS_STENCILMASK, 0xff);
+    set_render_state( D3DRS_STENCILMASK, 0xff);
     //  Configure alpha-blending
-    check_state( device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA) );
-    check_state( device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA) );
+    set_render_state( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA );
+    set_render_state( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 
     toggle_wireframe();
 }
@@ -156,13 +159,13 @@ void Application::render()
     set_shader_vector( SHADER_REG_SHADOW_ATTENUATION, SHADER_VAL_SHADOW_ATTENUATION );
 
     // Draw Plane
-    check_state( device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE) );
+    set_render_state( D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE );
     draw_model( plane, time, false );
     // Draw shadows if point_light_enabled
-    check_state( device->SetRenderState(D3DRS_ZENABLE, FALSE) );
-    check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL) );
-    check_state( device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCRSAT) );
-    check_state( device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE) );
+    set_render_state( D3DRS_ZENABLE, FALSE );
+    set_render_state( D3DRS_STENCILFUNC, D3DCMP_EQUAL );
+    set_render_state( D3DRS_STENCILPASS, D3DSTENCILOP_INCRSAT );
+    set_render_state( D3DRS_ALPHABLENDENABLE, TRUE );
     if ( point_light_enabled )
     {
         for ( Models::iterator iter = models.begin(); iter != models.end(); ++iter )
@@ -171,9 +174,9 @@ void Application::render()
         }
     }
     // Draw models
-    check_state( device->SetRenderState(D3DRS_ZENABLE, TRUE) );
-    check_state( device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS) );
-    check_state( device->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE) );
+    set_render_state( D3DRS_ZENABLE, TRUE );
+    set_render_state( D3DRS_STENCILFUNC, D3DCMP_ALWAYS );
+    set_render_state( D3DRS_ALPHABLENDENABLE, FALSE );
     for ( Models::iterator iter = models.begin(); iter != models.end(); ++iter )
     {
         draw_model( *iter, time, false );
@@ -300,11 +303,11 @@ void Application::toggle_wireframe()
 
     if( wireframe )
     {
-        check_state( device->SetRenderState( D3DRS_FILLMODE, D3DFILL_WIREFRAME ) );
+        set_render_state( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
     }
     else
     {
-        check_state( device->SetRenderState( D3DRS_FILLMODE, D3DFILL_SOLID ) );
+        set_render_state( D3DRS_FILLMODE, D3DFILL_SOLID );
     }
 }
 
