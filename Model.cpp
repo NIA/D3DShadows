@@ -171,7 +171,7 @@ Plane::Plane( IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitive_type, VertexS
     D3DXMATRIX rotation_mx = rotate_matrix(rotation);
     D3DXVec4Transform( &normal_4d, &normal_4d, &rotation_mx );
 
-    normal = - D3DXVECTOR3( normal_4d ); // TODO: Why minus??
+    normal = D3DXVECTOR3( normal_4d ); // TODO: Why minus??
 
     d = D3DXVec3Dot( &position, &normal );
 }
@@ -204,5 +204,5 @@ D3DXMATRIX Plane::get_projection_matrix(const D3DXVECTOR3 light_position) const
                    0,   0,   0,  0,
                    n.x, n.y, n.z, -L_dot_n );
 
-    return M1 - M2 + M3 + Mz;
+    return -( M1 - M2 + M3 + Mz );
 }
