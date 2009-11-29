@@ -58,7 +58,7 @@ namespace
 
 Application::Application() :
     d3d(NULL), device(NULL), window(WINDOW_SIZE, WINDOW_SIZE), camera(5, 0.68f, 0), // Constants selected for better view of the scene
-    point_light_enabled(true), ambient_light_enabled(true), plane(NULL), point_light_position(SHADER_VAL_POINT_POSITION)
+    point_light_enabled(true), ambient_light_enabled(true), plane(NULL), light_source(NULL), point_light_position(SHADER_VAL_POINT_POSITION)
 {
     try
     {
@@ -158,6 +158,8 @@ void Application::render()
     set_shader_matrix( SHADER_REG_SHADOW_PROJ_MX, shadow_proj_matrix        );
     set_shader_vector( SHADER_REG_SHADOW_ATTENUATION, SHADER_VAL_SHADOW_ATTENUATION );
 
+    // Draw Light Source
+    draw_model( light_source, time, false );
     // Draw Plane
     set_render_state( D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE );
     draw_model( plane, time, false );
@@ -272,6 +274,8 @@ void Application::run()
 {
     if( plane == NULL )
         throw NoPlaneError();
+    if( light_source == NULL )
+        throw NoLightSourceModelError();
 
     window.show();
     window.update();

@@ -44,7 +44,7 @@ public:
     VertexShader &get_shadow_shader();
     virtual void set_time(float time) { UNREFERENCED_PARAMETER(time); }
     
-    // set_constants() returns number of constants used
+    // set_constants() returns number of constant registers used
     virtual unsigned set_constants(D3DXVECTOR4 *out_data, unsigned buffer_size) const { UNREFERENCED_PARAMETER(out_data); UNREFERENCED_PARAMETER(buffer_size); return 0; }
     
     const D3DXMATRIX &get_rotation_and_position() const;
@@ -80,7 +80,7 @@ public:
 
     // Overrides:
     virtual void set_time(float time);
-    virtual unsigned set_constants(D3DXVECTOR4 *out_data, unsigned buffer_size) const; // returns number of constants used
+    virtual unsigned set_constants(D3DXVECTOR4 *out_data, unsigned buffer_size) const; // returns number of constant registers used
 };
 
 class MorphingModel : public Model
@@ -104,7 +104,7 @@ public:
 
     // Overrides:
     virtual void set_time(float time);
-    virtual unsigned set_constants(D3DXVECTOR4 *out_data, unsigned buffer_size) const; // returns number of constants used
+    virtual unsigned set_constants(D3DXVECTOR4 *out_data, unsigned buffer_size) const; // returns number of constant registers used
 };
 
 class Plane : public Model
@@ -127,3 +127,22 @@ public:
     D3DXMATRIX get_projection_matrix(const D3DXVECTOR3 light_position) const;
 };
 
+class LightSource : public Model
+{
+private:
+    float radius;
+public:
+    LightSource( IDirect3DDevice9 *device,
+                 D3DPRIMITIVETYPE primitive_type,
+                 VertexShader &shader,
+                 const Vertex *vertices,
+                 unsigned vertices_count,
+                 const Index *indices,
+                 unsigned indices_count,
+                 unsigned primitives_count,
+                 D3DXVECTOR3 position,
+                 D3DXVECTOR3 rotation,
+                 float radius);
+    // Overrides:
+    virtual unsigned set_constants(D3DXVECTOR4 *out_data, unsigned buffer_size) const; // returns number of constant registers used
+};

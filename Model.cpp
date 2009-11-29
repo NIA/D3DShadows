@@ -11,6 +11,7 @@ namespace
     const float MORPHING_OMEGA = 2.0f*D3DX_PI/MORPHING_PERIOD;
 
     const unsigned MORPHING_CONSTANTS_USED = 2; // final radius and t
+    const unsigned LIGHT_SOURCE_CONSTANTS_USED = 1; // radius
 }
 
 extern const unsigned VECTORS_IN_MATRIX;
@@ -127,7 +128,7 @@ void SkinningModel::set_time(float time)
 }
 
 unsigned SkinningModel::set_constants(D3DXVECTOR4 *out_data, unsigned buffer_size) const
-// returns number of constants used
+// returns number of constant registers used
 {
     _ASSERT( buffer_size >= BONES_COUNT*VECTORS_IN_MATRIX ); // enough space?
     memcpy(out_data, bones, BONES_COUNT*VECTORS_IN_MATRIX*sizeof(D3DXVECTOR4));
@@ -150,7 +151,7 @@ void MorphingModel::set_time(float time)
 }
 
 unsigned MorphingModel::set_constants(D3DXVECTOR4 *out_data, unsigned buffer_size) const
-// returns number of constants used
+// returns number of constant registers used
 {
     _ASSERT( buffer_size >= MORPHING_CONSTANTS_USED); // enough space?
     out_data[0] = D3DXVECTOR4(final_radius, final_radius, final_radius, final_radius);
@@ -205,4 +206,19 @@ D3DXMATRIX Plane::get_projection_matrix(const D3DXVECTOR3 light_position) const
                    n.x, n.y, n.z, -L_dot_n );
 
     return -( M1 - M2 + M3 + Mz );
+}
+
+LightSource::LightSource( IDirect3DDevice9 *device, D3DPRIMITIVETYPE primitive_type, VertexShader &shader, const Vertex *vertices,
+                          unsigned vertices_count, const Index *indices, unsigned indices_count, unsigned primitives_count,
+                          D3DXVECTOR3 position, D3DXVECTOR3 rotation, float radius )
+: Model(device, primitive_type, shader, shader, sizeof(Vertex), vertices, vertices_count, indices, indices_count,
+        primitives_count, position, rotation), radius(radius)
+{}
+
+unsigned LightSource::set_constants(D3DXVECTOR4 *out_data, unsigned buffer_size) const
+// returns number of constant registers used
+{
+    _ASSERT( buffer_size >= MORPHING_CONSTANTS_USED); // enough space?
+    out_data[0] = D3DXVECTOR4(radius, radius, radius, radius);
+    return LIGHT_SOURCE_CONSTANTS_USED;
 }

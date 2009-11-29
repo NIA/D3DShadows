@@ -12,6 +12,7 @@ namespace
     const char *MORPHING_SHADER_FILENAME = "morphing.vsh";
     const char *MORPHING_SHADOW_SHADER_FILENAME = "morphing_shadow.vsh";
     const char *PLANE_SHADER_FILENAME = "plane.vsh";
+    const char *LIGHT_SOURCE_SHADER_FILENAME = "light_source.vsh";
     const D3DCOLOR colors[] =
     {
         D3DCOLOR_XRGB(250, 30, 10),
@@ -45,6 +46,7 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
         VertexShader morphing_shader(app.get_device(), VERTEX_DECL_ARRAY, MORPHING_SHADER_FILENAME);
         VertexShader morphing_shadow_shader(app.get_device(), VERTEX_DECL_ARRAY, MORPHING_SHADOW_SHADER_FILENAME);
         VertexShader plane_shader(app.get_device(), VERTEX_DECL_ARRAY, PLANE_SHADER_FILENAME);
+        VertexShader light_source_shader(app.get_device(), VERTEX_DECL_ARRAY, LIGHT_SOURCE_SHADER_FILENAME);
         
         // -------------------------- C y l i n d e r -----------------------
 
@@ -142,7 +144,7 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
         // ----------------------------- P l a n e --------------------------
         plane_vertices = new Vertex[PLANE_VERTICES_COUNT];
         plane_indices = new Index[PLANE_INDICES_COUNT];
-        plane(40, 40, plane_vertices, plane_indices, PLANE_COLOR); // special for cypok
+        plane(40, 40, plane_vertices, plane_indices, PLANE_COLOR);
 
         Plane plane( app.get_device(),
                      D3DPT_TRIANGLELIST,
@@ -155,11 +157,26 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
                      D3DXVECTOR3(0, 0, -1.2f),
                      D3DXVECTOR3(0,0,0) );
 
+        // -------------------------- Light source --------------------------
+
+        LightSource light_source( app.get_device(),
+                                  D3DPT_TRIANGLELIST,
+                                  light_source_shader,
+                                  tesselated_vertices,
+                                  ALL_TESSELATED_VERTICES_COUNT,
+                                  tesselated_indices,
+                                  ALL_TESSELATED_INDICES_COUNT,
+                                  ALL_TESSELATED_INDICES_COUNT/VERTICES_PER_TRIANGLE,
+                                  D3DXVECTOR3(0,0,0),
+                                  D3DXVECTOR3(0,0,0),
+                                  0.08f);
+
         // ---------------------------- a d d i n g -------------------------
         app.add_model(cylinder1);
         app.add_model(cylinder2);
         app.add_model(pyramid);
         app.set_plane(plane);
+        app.set_light_source_model(light_source);
 
         app.run();
 

@@ -282,6 +282,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\light_source.vsh"
+				>
+			</File>
+			<File
 				RelativePath=".\morphing.vsh"
 				>
 			</File>

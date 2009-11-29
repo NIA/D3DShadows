@@ -27,6 +27,7 @@ private:
 
     Models models;
     Plane *plane;
+    LightSource *light_source;
 
     Camera camera;
 
@@ -81,6 +82,7 @@ public:
 
     void add_model(Model &model);
     void set_plane(Plane &_plane) { plane = &_plane; }
+    void set_light_source_model(LightSource &_light_source) { light_source = &_light_source; }
     void remove_model(Model &model);
     void run();
 

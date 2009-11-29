@@ -69,7 +69,12 @@ public:
 class NoPlaneError : public RuntimeError
 {
 public:
-    NoPlaneError() : RuntimeError( _T("Error: attempting to run loop when no plane set") ) {}
+    NoPlaneError() : RuntimeError( _T("Error: attempting to run application when no plane set") ) {}
+};
+class NoLightSourceModelError : public RuntimeError
+{
+public:
+    NoLightSourceModelError() : RuntimeError( _T("Error: attempting to run application when no model for drawing light source set") ) {}
 };
 
 inline void check_render( HRESULT res )
