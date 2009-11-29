@@ -7,6 +7,7 @@
 #include <crtdbg.h>
 #include "Error.h"
 
+// It must be a macro, not a constant, because it must be known at compile-time (it is used for array initialization in another module)
 #define BONES_COUNT 2
 
 // a helper to release D3D interface if it is not NULL

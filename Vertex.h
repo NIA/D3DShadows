@@ -4,8 +4,9 @@
 typedef DWORD Index;
 extern const D3DFORMAT INDEX_FORMAT;
 
-// It must be a macro, not a constant, because it must be known at compile-time (it is used for array initialization)
+// They must be macros, not constants, because they must be known at compile-time (they are used for array initialization in another module)
 #define VERTICES_PER_TRIANGLE 3
+#define PLANES_PER_PYRAMID 8
 
 inline int rand_col_comp()
 // Returns random color component: an integer between 0 and 255

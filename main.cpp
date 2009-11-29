@@ -2,8 +2,8 @@
 #include "Application.h"
 #include "Model.h"
 #include "cylinder.h"
-#include "tessellate.h"
 #include "plane.h"
+#include "pyramid.h"
 
 namespace
 {
@@ -13,6 +13,7 @@ namespace
     const char *MORPHING_SHADOW_SHADER_FILENAME = "morphing_shadow.vsh";
     const char *PLANE_SHADER_FILENAME = "plane.vsh";
     const char *LIGHT_SOURCE_SHADER_FILENAME = "light_source.vsh";
+
     const D3DCOLOR colors[] =
     {
         D3DCOLOR_XRGB(250, 30, 10),
@@ -25,6 +26,18 @@ namespace
     const D3DCOLOR SPHERE_COLOR = D3DCOLOR_XRGB(255, 150, 0);
     const D3DCOLOR SECOND_CYLINDER_COLOR = D3DCOLOR_XRGB(0, 70, 220);
     const D3DCOLOR PLANE_COLOR = D3DCOLOR_XRGB(50,255,50);
+
+    const float SPHERE_RADIUS = 0.7071f;
+    const float LIGHT_SOURCE_RADIUS = 0.08f;
+
+    const DWORD SPHERE_TESSELATE_DEGREE = 40;
+    const Index SPHERE_ALL_TESSELATED_VERTICES_COUNT = pyramid_vertices_count(SPHERE_TESSELATE_DEGREE); // per 8 tessellated triangles
+    const DWORD SPHERE_ALL_TESSELATED_INDICES_COUNT = pyramid_indices_count(SPHERE_TESSELATE_DEGREE); // per 8 tessellated triangles
+
+    const DWORD LIGHT_SOURCE_TESSELATE_DEGREE = 10;
+    const Index LIGHT_SOURCE_ALL_TESSELATED_VERTICES_COUNT = PLANES_PER_PYRAMID*tesselated_vertices_count(LIGHT_SOURCE_TESSELATE_DEGREE); // per 8 tessellated triangles
+    const DWORD LIGHT_SOURCE_ALL_TESSELATED_INDICES_COUNT = PLANES_PER_PYRAMID*tesselated_indices_count(LIGHT_SOURCE_TESSELATE_DEGREE); // per 8 tessellated triangles
+
 }
 
 INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
@@ -33,10 +46,12 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
     
     SkinningVertex * cylinder_vertices = NULL;
     Index * cylinder_indices = NULL;
-    Vertex * tesselated_vertices = NULL;
-    Index * tesselated_indices = NULL;
+    Vertex * sphere_vertices = NULL;
+    Index * sphere_indices = NULL;
     Vertex * plane_vertices = NULL;
     Index * plane_indices = NULL;
+    Vertex * light_source_vertices;
+    Index * light_source_indices;
     try
     {
         Application app;
@@ -91,55 +106,23 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
 
         
         // -------------------------- P y r a m i d -----------------------
-        const Index PLANES_PER_PYRAMID = 8;
-        const D3DXVECTOR3 normal_up(0,0,1);
-        const Vertex pyramid_vertices[]=
-        {
-            Vertex(D3DXVECTOR3(  0.5f, -0.5f,  0.00f ),normal_up),
-            Vertex(D3DXVECTOR3( -0.5f, -0.5f,  0.00f ),normal_up),
-            Vertex(D3DXVECTOR3( -0.5f,  0.5f,  0.00f ),normal_up),
-            Vertex(D3DXVECTOR3(  0.5f,  0.5f,  0.00f ),normal_up),
-            Vertex(D3DXVECTOR3(  0.0f,  0.0f,  0.7071f ),normal_up),
-            Vertex(D3DXVECTOR3(  0.0f,  0.0f, -0.7071f ),normal_up),
-        };
-        const Index pyramid_indices[PLANES_PER_PYRAMID*VERTICES_PER_TRIANGLE] =
-        {
-            0, 4, 3,
-            3, 4, 2,
-            2, 4, 1,
-            1, 4, 0,
+        sphere_vertices = new Vertex[SPHERE_ALL_TESSELATED_VERTICES_COUNT];
+        sphere_indices = new Index[SPHERE_ALL_TESSELATED_INDICES_COUNT];
 
-            0, 3, 5,
-            3, 2, 5,
-            2, 1, 5,
-            1, 0, 5,
-        };
-
-        const Index ALL_TESSELATED_VERTICES_COUNT = PLANES_PER_PYRAMID*TESSELATED_VERTICES_COUNT; // per 8 tessellated triangles
-        const DWORD ALL_TESSELATED_INDICES_COUNT = PLANES_PER_PYRAMID*TESSELATED_INDICES_COUNT; // per 8 tessellated triangles
-
-        tesselated_vertices = new Vertex[ALL_TESSELATED_VERTICES_COUNT];
-        tesselated_indices = new Index[ALL_TESSELATED_INDICES_COUNT];
-
-        for( DWORD i = 0; i < PLANES_PER_PYRAMID; ++i )
-        {
-            tessellate( pyramid_vertices, pyramid_indices, i*VERTICES_PER_TRIANGLE,
-                        &tesselated_vertices[i*TESSELATED_VERTICES_COUNT], i*TESSELATED_VERTICES_COUNT,
-                        &tesselated_indices[i*TESSELATED_INDICES_COUNT], SPHERE_COLOR );
-        }
+        pyramid(SPHERE_RADIUS*SPHERE_RADIUS, sphere_vertices, sphere_indices, SPHERE_COLOR, SPHERE_TESSELATE_DEGREE);
         
-        MorphingModel pyramid( app.get_device(),
-                               D3DPT_TRIANGLELIST,
-                               morphing_shader,
-                               morphing_shadow_shader,
-                               tesselated_vertices,
-                               ALL_TESSELATED_VERTICES_COUNT,
-                               tesselated_indices,
-                               ALL_TESSELATED_INDICES_COUNT,
-                               ALL_TESSELATED_INDICES_COUNT/VERTICES_PER_TRIANGLE,
-                               D3DXVECTOR3(0, -1.3f, -0.2f),
-                               D3DXVECTOR3(0,0,0),
-                               0.7071f );
+        MorphingModel sphere( app.get_device(),
+                              D3DPT_TRIANGLELIST,
+                              morphing_shader,
+                              morphing_shadow_shader,
+                              sphere_vertices,
+                              SPHERE_ALL_TESSELATED_VERTICES_COUNT,
+                              sphere_indices,
+                              SPHERE_ALL_TESSELATED_INDICES_COUNT,
+                              SPHERE_ALL_TESSELATED_INDICES_COUNT/VERTICES_PER_TRIANGLE,
+                              D3DXVECTOR3(0, -1.3f, -0.2f),
+                              D3DXVECTOR3(0,0,0),
+                              SPHERE_RADIUS );
 
         // ----------------------------- P l a n e --------------------------
         plane_vertices = new Vertex[PLANE_VERTICES_COUNT];
@@ -158,44 +141,52 @@ INT WINAPI wWinMain( HINSTANCE, HINSTANCE, LPWSTR, INT )
                      D3DXVECTOR3(0,0,0) );
 
         // -------------------------- Light source --------------------------
+        light_source_vertices = new Vertex[LIGHT_SOURCE_ALL_TESSELATED_VERTICES_COUNT];
+        light_source_indices = new Index[LIGHT_SOURCE_ALL_TESSELATED_INDICES_COUNT];
+
+        pyramid(LIGHT_SOURCE_RADIUS*LIGHT_SOURCE_RADIUS, light_source_vertices, light_source_indices, D3DCOLOR_XRGB(0,0,0) /* ignored */, LIGHT_SOURCE_TESSELATE_DEGREE);
 
         LightSource light_source( app.get_device(),
                                   D3DPT_TRIANGLELIST,
                                   light_source_shader,
-                                  tesselated_vertices,
-                                  ALL_TESSELATED_VERTICES_COUNT,
-                                  tesselated_indices,
-                                  ALL_TESSELATED_INDICES_COUNT,
-                                  ALL_TESSELATED_INDICES_COUNT/VERTICES_PER_TRIANGLE,
+                                  light_source_vertices,
+                                  LIGHT_SOURCE_ALL_TESSELATED_VERTICES_COUNT,
+                                  light_source_indices,
+                                  LIGHT_SOURCE_ALL_TESSELATED_INDICES_COUNT,
+                                  LIGHT_SOURCE_ALL_TESSELATED_INDICES_COUNT/VERTICES_PER_TRIANGLE,
                                   D3DXVECTOR3(0,0,0),
                                   D3DXVECTOR3(0,0,0),
-                                  0.08f);
+                                  LIGHT_SOURCE_RADIUS);
 
         // ---------------------------- a d d i n g -------------------------
         app.add_model(cylinder1);
         app.add_model(cylinder2);
-        app.add_model(pyramid);
+        app.add_model(sphere);
         app.set_plane(plane);
         app.set_light_source_model(light_source);
 
         app.run();
 
         // -------------------------- c l e a n   u p -----------------------
-        delete_array(&tesselated_indices);
-        delete_array(&tesselated_vertices);
+        delete_array(&sphere_indices);
+        delete_array(&sphere_vertices);
         delete_array(&cylinder_indices);
         delete_array(&cylinder_vertices);
         delete_array(&plane_indices);
         delete_array(&plane_vertices);
+        delete_array(&light_source_indices);
+        delete_array(&light_source_vertices);
     }
     catch(RuntimeError &e)
     {
-        delete_array(&tesselated_indices);
-        delete_array(&tesselated_vertices);
+        delete_array(&sphere_indices);
+        delete_array(&sphere_vertices);
         delete_array(&cylinder_indices);
         delete_array(&cylinder_vertices);
         delete_array(&plane_indices);
         delete_array(&plane_vertices);
+        delete_array(&light_source_indices);
+        delete_array(&light_source_vertices);
         const TCHAR *MESSAGE_BOX_TITLE = _T("Shadows error!");
         MessageBox(NULL, e.message(), MESSAGE_BOX_TITLE, MB_OK | MB_ICONERROR);
         return -1;

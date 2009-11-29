@@ -198,6 +198,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\pyramid.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Shader.cpp"
 				>
 			</File>
@@ -249,6 +253,10 @@
 			</File>
 			<File
 				RelativePath=".\plane.h"
+				>
+			</File>
+			<File
+				RelativePath=".\pyramid.h"
 				>
 			</File>
 			<File
