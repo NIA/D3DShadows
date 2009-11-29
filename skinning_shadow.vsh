@@ -29,6 +29,10 @@ m4x4 r0, v0, c8
 mad r0.xyz, r0.xyz, v2.y, r1.xyz    ; second bone
 m4x4 r1, r0, c27                    ; position and rotation
 m4x4 r3, r1, c31  ; projection to plane
+;;;;;;;;;;;;;;;; Results: coordinates ;;;;;;;;;;;;;;;;;;;;;;;
+m4x4 oPos, r3, c0
+
+; - - - - - - - - -  dividing to .w - - - - - - - - - - - - ;
 rcp r7, r3
 mul r3, r3, r7.w
 
@@ -56,5 +60,5 @@ sge r8, r4, r6          ; |AC| > |BC|
 mul r10.a, r10.a, r8.x
 
 ;;;;;;;;;;;;;;;;;;;;;;;; Results ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-m4x4 oPos, r3, c0
+
 mov oD0, r10
