@@ -76,6 +76,11 @@ class NoLightSourceModelError : public RuntimeError
 public:
     NoLightSourceModelError() : RuntimeError( _T("Error: attempting to run application when no model for drawing light source set") ) {}
 };
+class NoMemoryError : public RuntimeError
+{
+public:
+    NoMemoryError() : RuntimeError( _T("Error: not enough memory") ) {}
+};
 
 inline void check_render( HRESULT res )
 {

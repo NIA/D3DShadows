@@ -8,6 +8,7 @@ void plane(float length, float width, Vertex *res_vertices, Index *res_indices, 
 {
     Index vertex = 0; // current vertex
     DWORD index = 0; // current index
+    _ASSERT(PLANE_STEPS_PER_HALF_SIDE != 0);
 
     const float x_step = length/(2*PLANE_STEPS_PER_HALF_SIDE);
     const float y_step = width/(2*PLANE_STEPS_PER_HALF_SIDE);

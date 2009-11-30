@@ -124,6 +124,9 @@ void cylinder( float radius, float height,
     
     _ASSERT(res_vertices != NULL);
     _ASSERT(res_indices != NULL);
+    _ASSERT(CYLINDER_EDGES_PER_BASE != 0);
+    _ASSERT(CYLINDER_EDGES_PER_HEIGHT != 0);
+    _ASSERT(CYLINDER_EDGES_PER_CAP != 0);
 
     GENERATION_PARAMS params;
     // output buffers
